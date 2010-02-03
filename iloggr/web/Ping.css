@@ -1,0 +1,18 @@
+.iLoggr-PingUI-Status-OkMessage {
+    color: white;
+    background-color: green;    
+}
+
+.iLoggr-PingUI-Status-NotOkMessage {
+    color: white;
+    background-color: red;
+}
+
+.iLoggr-PingUI-Status-UnknownMessage {
+    color: black;
+    background-color: orange;
+}
+
+.gwt-Button {
+    color: black;
+}

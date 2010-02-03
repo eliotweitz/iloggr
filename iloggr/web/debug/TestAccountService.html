@@ -1,0 +1,276 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Test iLoggr Account Services</title>
+<SCRIPT type="text/javascript" language="Javascript" SRC="http://www.JSON.org/json2.js">
+</SCRIPT>
+<script>testParams = {
+		"accountName" : "Test Account",
+   	    "password" : "abc",
+        "phone" : "1234567890",
+        "email" : "eliot@iloggr.com",
+        "appName" : "TestApp",
+        "appID" : "1",
+        "ppName" : "param1",
+        "ppValue" : "TEST",
+        "Account" : "",
+        "securityToken" : "",
+        "callback" : "",
+        "result" : ""
+};
+</script>
+</head>
+<body>
+<script type="text/javascript">
+// set up the access variables
+serviceURL = "http://localhost:8080/iLoggrServer/";
+
+
+function write(line) {
+	var oldHTML = document.getElementById('results').innerHTML;
+	var newHTML = oldHTML + "<br>" + line;
+	document.getElementById('results').innerHTML = newHTML;
+}
+
+
+function onComplete(testParams) {  
+}
+
+
+function iLoggrRequest(serviceName, testParams, JSONRequest) {
+	var requestURL = JSON.stringify(JSONRequest);
+	write("JSON Request: <font color=green>" + requestURL + "</font>");
+	// Create new request
+	var asyncHttp = new XMLHttpRequest()
+	asyncHttp.open("POST", serviceURL + serviceName, /*async*/true);
+	asyncHttp.setRequestHeader("Content-type", "text/x-iloggr-rpc");
+	asyncHttp.setRequestHeader("Content-length", requestURL.length);
+	asyncHttp.setRequestHeader("Connection", "close");
+	asyncHttp.onreadystatechange = function() { 	
+		var response = false;
+		/*	0 = uninitialized
+		1 = loading
+		2 = loaded
+		3 = interactive
+		4 = complete*/
+		if (this.readyState == 4) {  // complete
+	    	if (this.status == 200) {
+	      		// success  
+	      		write("Response: <font color=blue>" + this.responseText + "</font>");
+	      		response = eval('(' + this.responseText + ')');
+	    		if (response.error < 0) {
+		    		write("<font color=red>Error received from call: " + response.errorMessage + "</font>");
+	    		} 
+	    	} else {
+	     			write("Error: "+this.status);  
+	     			write("<b>Done</b>");
+	    	}
+	        testParams.callback(testParams, response);
+	   	 } // complete
+		};
+	asyncHttp.send(requestURL);
+ }
+ 
+
+function acctCreated(testParams, response) {
+	if (response.error < 0) {
+		write("<font color=red>Account creation failed!</font>");
+	} else {
+		write("<font color=green>Account: " + testParams.accountName + " successfully created, check email for activation link.</font>");
+	}
+	write("<b>Done</b>");
+}
+
+function runTests() {
+	testParams.email=document.getElementById('email').value;
+	testParams.accountName=document.getElementById('accountName').value;
+/*	write("<br>Account name is: " + testParams.accountName);
+	write("Password is: " + testParams.password);
+	write("Phone is: " + testParams.phone);
+	write("Email is: " + testParams.email + "<br>");*/
+	// begin tests
+	var createAccount = {"method":"createAccount", "parameters":[{"__jsonclass__":"String", "value":testParams.accountName}, 
+	                                                         	{"__jsonclass__":"String", "value":testParams.email}, 
+	                                                         	{"__jsonclass__":"String", "value":testParams.password}, 
+	                                                         	{"__jsonclass__":"String", "value":testParams.phone}
+	                                                         	]};
+	write("<b>Creating account: " + testParams.accountName + "</b>");	
+	testParams.callback = acctCreated;
+	iLoggrRequest("account", testParams, createAccount);
+}
+
+//  public String fetchEventDataCSV(String token, Long appID, Date from, Date to, boolean desc, int limit) throws ILException {
+function getCSVReport() {
+	
+//	yyyyddMMHHmmss
+	var getReport = {"method":"fetchEventDataCSV", "parameters":[{"__jsonclass__":"String", "value":"-gq4z4xa87w3g"},
+	                                                             {"__jsonclass__":"Long", "value":8},
+	                                                             {"__jsonclass__":"Date", "value":"20090517000000"},
+	                                                             {"__jsonclass__":"Date", "value":"20090519000000"},
+	                                                             {"__jsonclass__":"Boolean", "value":true},
+	                                                             {"__jsonclass__":"Integer", "value":100}
+	                                                             ]};
+
+	//var form = document.createElement("form");
+  //  form.setAttribute("method", "post");
+  //  form.setAttribute("action", serviceURL + serviceName);
+ // setting form target to a window named 'formresult'
+ //   document.pt.setAttribute("target", "formresult");
+ // creating the 'formresult' window with custom features prior to submitting the form
+  //  window.open(test.html, 'formresult', 'scrollbars=no,menubar=no,height=600,width=800,resizable=yes,toolbar=no,status=no');
+            
+ //   var hiddenField = document.createElement("input");              
+  //        form.appendChild(hiddenField);
+   //     document.body.appendChild(form);    // Not entirely sure if this is necessary    
+   document.pt.value=getReport;
+   document.pt.submit();               
+  //      form.submit();
+
+
+	// write("<b>Requesting report</b> ");   
+	//    testParams.callback = reportGenerated;
+	//    iLoggrRequest("report", testParams, getReport);
+}
+
+function reportGenerated(testparams, response) {
+    if (response.error < 0) {
+        write("<font color=red>Report creation failed!</font>");
+    } else {
+        docy.write(response);
+    }
+    write("<b>Done</b>");
+}
+
+
+function authenticateAccountByToken() {
+	testParams.securityToken=document.getElementById('securityToken').value;
+	write("<b>Authenticating account: " + testParams.accountName + "</b>");	
+	var cmd = {"method":"authenticateAccount", "parameters":[{"__jsonclass__":"String", "value":testParams.securityToken}]};
+	testParams.callback = function (testParams, response) {
+		if (response.error < 0) {
+			write("<font color=red>Token authentication failed!</font>");
+			write("<b>Done<b>");
+			return;
+		}
+		var result = response.result;
+		write("<font color=green>Authentication succeeded, ID is: " + result.id.value + "</font>");
+		write("<b>Done</b>");
+	};
+	iLoggrRequest("account", testParams, cmd);
+}
+
+function authenticateAccountByPassword() {
+	testParams.accountName=document.getElementById('accountName').value;
+	write("<b>Authenticating account: " + testParams.accountName + "</b>");	
+	var cmd = {"method":"authenticateAccount", "parameters":[{"__jsonclass__":"String", "value":testParams.accountName}, 
+	                                                             	{"__jsonclass__":"String", "value":testParams.password}]};
+	testParams.callback = function (testParams, response) {
+		if (response.error < 0) {
+			write("<font color=red>Password authentication failed!</font>");
+			write("<b>Done</b>");
+			return;
+		}
+		var result = response.result;
+		write("<font color=green>Authentication succeeded, ID is: " + result.id.value + "</font>");
+		write("<b>Done</b>");
+	};
+	iLoggrRequest("account", testParams, cmd);
+}
+
+
+function addApplication() {
+	testParams.securityToken=document.getElementById('securityToken').value;
+	testParams.appName=document.getElementById('appName').value;
+	write("<b>Adding Application: " + testParams.appName + "</b>");	
+	var cmd = {"method":"createNewApplication", "parameters":[{"__jsonclass__":"String", "value":testParams.securityToken}, 
+	                                                          {"__jsonclass__":"String", "value":testParams.appName}]};
+	testParams.callback = function (testParams, response) {
+		if (response.error < 0) {
+			write("<font color=red>Add Application failed!</font>");
+			write("<b>Done</b>");
+			return;
+		}
+		var result = response.result;
+		write("<font color=green>Add application succeeded! Check email for application ID and use that for provisioning testing.</font>");
+		write("<b>Done</b>");
+	};
+	iLoggrRequest("account", testParams, cmd);
+}
+
+function addProvisioningParameter() {
+	testParams.securityToken=document.getElementById('securityToken').value;
+	testParams.appID=document.getElementById('appID').value;
+	testParams.ppName=document.getElementById('ppName').value;
+	testParams.ppValue=document.getElementById('ppValue').value;
+	write("<b>Adding Parameter: " + testParams.ppName + " with value: " + testParams.ppValue + " to AppID: " + testParams.appID + "</b>");	
+	var cmd = {"method":"addProvisioningParameter", "parameters":[{"__jsonclass__":"String", "value":testParams.securityToken}, 
+	                                                              {"__jsonclass__":"Long", "value":testParams.appID},
+    														      {"__jsonclass__":"String", "value":testParams.ppName},
+    														      {"__jsonclass__":"String", "value":testParams.ppValue}]};
+  	testParams.callback = function (testParams, response) {
+		if (response.error < 0) {
+			write("<font color=red>Add provisioning parameter failed!</font>");
+			write("<b>Done</b>");
+			return;
+		}
+		var result = response.result;
+		write("<font color=green>Add provisiong parameter succeeded!</font>");
+		write("<b>Done</b>");
+	};
+	iLoggrRequest("provision", testParams, cmd);
+}
+
+
+</script>
+
+<h3>Test iLoggr Services</h3>
+Please remember to check email when signing up to get both security token and application ID
+<br>
+Email for test: <input type="text" id="email"><br>
+<br>
+<font color=blue><b>Test Account Service</b></font><br>
+Account name for test: <input type="text" id="accountName"><br>
+<input type="button" value="Create account" onclick="runTests()" /> (wait for activation email to get security token)
+<br>
+<input type="button" value="Authenticate account with username/password" onclick="authenticateAccountByPassword()" />
+<br>
+Enter security token from Email: <input type="text" id="securityToken"><br>
+<input type="button" value="Authenticate account with security token" onclick="authenticateAccountByToken()" />
+<br>
+Enter application name: <input type="text" id="appName"><br>
+<input type="button" value="Add New Application" onclick="addApplication()" /> (wait for email to get new application ID)
+<br><br>
+<font color=blue><b>Test Provisioning Service</b></font>
+<br>
+Application ID: <input type="text" id="appID"><br>
+Provisioning parameter name: <input type="text" id="ppName"><br>
+Provisioning parameter value: <imput type="text" id="ppValue"><br>
+<input type="button" value="Add Provisioning Parameter" onclick="addProvisioningParameter()" />
+<br>
+<input type="button" value="Run report" onclick="getCSVReport()" /> 
+<br><br>
+<font color=red><b>Test Results</b></font>
+<br><br>
+
+<div id='results' style="height:280px;width:1200px;font:16px/26px Georgia, Garamond, Serif;overflow:scroll;">
+</div>
+
+<form name="pt" action="http://localhost:8080/iLoggrServer/report" method="post">
+<input name="mcall" type="hidden" value="">
+</form>
+
+
+<script>
+document.getElementById('accountName').value = testParams.accountName;
+document.getElementById('appName').value = testParams.appName;
+document.getElementById('email').value = testParams.email;
+document.getElementById('securityToken').value = testParams.securityToken;
+document.getElementById('ppName').value = testParams.ppName;
+document.getElementById('ppValue').value = testParams.ppValue;
+document.getElementById('appID').value = testParams.appID;
+
+</script>
+
+</body>
+</html>

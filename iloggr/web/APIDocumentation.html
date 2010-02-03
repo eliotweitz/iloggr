@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link type="text/css" rel="stylesheet" href="ILoggr.css">
+<title>iLoggr Library API Documentation</title>
+</head>
+<body>
+All calls below are static methods invoked on the ILoggr class object.  
+<br><h3>Initialization</h3>
+Initialize ILoggr library (no location enabled)
+<pre><font face="monaco" size=2>
++(void)launch:(ILCallback*)callback;
+</font></pre><br>
+Initialize ILoggr library (with location enabled)
+<pre><font face="monaco" size=2>
++(void)launchWithLocationEnabled:(ILCallback*)callback;
+</font></pre><br>
+Check if initialized<pre><font face="monaco" size=2>
++(bool)isInitialized;
+</font></pre><br>
+Use only if you want to use a different application file than iloggr.plist, which is loaded by default at launch
+<pre><font face="monaco" size=2>
++(bool)initializeFromFile:(NSString*)file callback:(ILCallback*)callback;
+</font></pre><br>
+<h3>Recording Application Session Duration</h3><br>
+Simple logging of the time the application was in use (place in application delegate <i>applicationWillTerminate</i> method.
+<pre><font face="monaco" size=2>
++(void)exit;
+</font></pre><br>
+This will log the total time of usage for the application and can be used to generate duration analysis graphs.
+<br>
+<h3>Recording Events</h3><br>
+Simple logging of a string value (will log location automatically if location is enabled).  
+<pre><font face="monaco" size=2>
++(void)record:(NSString*)description callback:(ILCallback*)callback;
+</font></pre><br>
+Logging of a string and numerical value (double) 
+<pre><font face="monaco" size=2>
++(void)recordWithData:(NSString*)description data:(double)data callback:(ILCallback*)callback;
+</font></pre><br>
+Increment application counter 
+<pre><font face="monaco" size=2>
++(void)incrementCounter:(NSString*)counterName callback:(ILCallback*)callback;
+</font></pre><br>
+<h3>Provisioning</h3><br>
+Gets the full list of provisioning parameters for the application
+<pre><font face="monaco" size=2>
++(void)getParameters:(ILCallback*)callback;
+<br>callback.result will contain an NSArray of ILParameter objects.  To iterate through the provisioning parameters, do the following:<br>
+for (ILParameter* parameter in callback.result) {
+...
+}
+</font></pre><br>
+Get an application provisioning parameter 
+<pre><font face="monaco" size=2>
++(void)getParameter:(NSString*)parameterName callback:(ILCallback*)callback;
+<br>
+callback.result will contain an ILParameter object.
+</font></pre><br>
+Get an MOTD announcement 
+ (will return an ILParameter object in callback.result that contains the string message: NSString* message = [callback.result stringValue];)<pre><font face="monaco" size=2>
++(void)getAnnouncement:(ILCallback*)callback;
+<br>
+callback.result will be an NSString object containing the MOTD.
+</font></pre><br>
+
+<h3>Location update features</h3><br>
+To set your own location update delegate
+<pre><font face="monaco" size=2>
++(void)setLocationUpdateDelegate:(id)delegate; // delegate needs to implement <MyCLControllerDelegate>
+</font></pre><br>
+Get the last fix from the location framework
+<pre><font face="monaco" size=2>
++(CLLocation*)getLastFix; // will return last fix if used launchWithLocationEnabled
+</font></pre><br>
+
+<h3>ILResponse</h3><br>
+The asynchronous callback function for the functions listed above are <font color=red>optional can can be nil.</font>   If specified, every callback function must have one argument, an ILReponse object that contains an error code and result.  The result property will contain the appropriate object, in the example above, an ILParameter object is returned containing the appropriate type value.
+The ILResponse object is passedFor instance, to get a provisioning parameter value, you would include the following code in your app:
+<br><br>
+Example of a callback for receiving a provisioning parameter:
+<br><pre>
+<font size=2 face="monaco">
+<font class="code-comment">// Get the game session time interval provisioning parameter for the app</font>
+[<font class="code-class">ILoggr</font> <font class="code-method">getParameter</font>:<font class="code-string">@"GameSessionTime"</font> <font class="code-method">callback</font>:[<font class="code-class">ILCallback</font> <font class="code-method">new</font>:<font class="code-system-keyword">self</font> <font class="code-method">selector</font>:<font class="code-system-keyword">@selector</font>(<font class="code-method">gotSessionTime</font>:)]];
+ 
+<font class="code-comment">// Async callback to set the fetched SystemGameTime provisioning parameter</font>
+(<font class="code-system-keyword">void</font>)gotSessionTime:(<font class="code-class">ILResponse</font>*)response {
+    <font class="code-system-class">NSString</font>* message;
+    if ([response <font class="code-method">hasError</font>]) {
+        NSLog(<font class="code-string">@"Error getting GameSessionTime provisioning parameter: %@"</font>, response.<font class="code-property">errorMessage</font>);
+        <font class="code-comment">// Set to default value</font>
+        appDelegate.<font class="code-property">gameSessionTime</font> = <font class="code-system-constant">300</font>; <font class="code-comment">// 5 minutes</font>
+    } else {
+        <font class="code-property">ILParameter</font>* param = response.<font class="code-property">result</font>; 
+        appDelegate.<font class="code-property">gameSessionTime</font> = [param <font class="code-method">integerValue]; <font class="code-comment">// Value is in seconds</font>
+    }
+ }
+
+</font></pre><br>
+<b>From the ILoggr.h header file:</b>
+ <pre>
+ <font size=2 face="monaco">
+ @interface ILResponse : NSObject {
+    id result;
+    int error;
+    NSString* errorMessage;
+}
+<br>        
+
+@property (retain) id result;
+@property int error;
+@property (retain) NSString* errorMessage;
+
++(ILResponse*)new;
++(id)newWithObject:(id)obj;
+-(bool)hasError;
+-(bool)isEmpty;
+ </pre>
+ <h3>ILParameter</h3><br>
+ The ILParameter class is used to pass provisioning parameters from the server to the iPhone application.  Is is placed in the callback "result" property.
+ <pre><font face="monaco" size=2><br>
+ @interface ILParameter : NSObject {
+    NSString* name; // used for provisioning only
+    NSString *type;
+    id objValue;
+    NSNumber *nValue;
+}
+<br>
+@property (retain) NSString* name;
+@property (retain) NSString* type;
+@property (retain) id objValue;
+@property (retain) NSNumber* nValue;
+
+<br>
+// Use these convenience methods to return the parameter values
+-(int)integerValue;
+-(float)floatValue;
+-(NSString*)stringValue;
+-(bool)booleanValue;
+-(bool)isInteger;
+-(bool)isFloat;
+-(bool)isString;
+-(bool)isBoolean;
+</font>
+ </pre>
+ 
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-10317372-1");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+</body>
+<html>

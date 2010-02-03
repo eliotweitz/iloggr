@@ -1,0 +1,54 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link type="text/css" rel="stylesheet" href="ILoggr.css">
+<title>Download iLoggr Library for the iPhone</title>
+</head>
+<body>
+To use the features and code with iLoggr, you must download and link your application code with the iLoggr static libraries: <i>iloggr.a</i> and <i> iloggrsim.a </i>in your XCode iPhone application project.<br><b><br>Instructions for install:</b><br><br>There are two versions of the iloggr library for different platform targets, iPhone simulator (<i>iloggrsim.a</i>) and iPhone/iPod (<i>iloggrsim.a</i>).  
+<br><br><font color=red>These libraries are currently compiled using the iPhone 3.1 Beta 3 release.</font><br><br><a href="iLoggr.zip">Download the zip file</a> containing <i>iloggr.a, iloggrsim.a</i> and <i>iloggr.h</i>. Unzip, and save all three files to a folder on your hard drive.
+In XCode, add a group called &quot;iLoggr&quot; to your project at the top level and copy all three files into that group.     It is most convenient to have both libraries copied into your XCode project so when you build for either different simulator or device targets, one will link and the other will be ignored.  <br><br>
+Please note that the following frameworks are required to successfully link the ILoggr library (even if location capabilities aren't used by your application):
+<br><br>UIKit.framework<br>
+CoreLocation.framework<br>
+<br>Linking in the CoreLocation framework should have no affect on your app's performance if you are not using the location capabilities of iLoggr.
+<br>
+<br><b>iLoggr.plist File</b><br>
+<br>Once you have created your new application using this website, you need to download and include into your iPhone XCode project the <i>iloggr.plist</i> file associated with your application.  There is a link to download this file in the "Application Summary" panel.<br><br>
+This file contains two values that identify both your account and your application's unique ID to the iLoggr server.  For security purposes, do not release this file to anyone outside of your development team.  
+<br><br><b>Minimal logging example</b><br>
+
+The following code added to your application will allow tracking of the number of unique iPhone users and the duration of use in a report:
+<br><pre><font face="monaco" size=2>
+- (<font class="code-system-keyword">void</font>)applicationDidFinishLaunching:(<font class="code-system-class">UIApplication</font> *)application {    
+    <font class="code-comment">// Record launch of application</font>
+    [<font class="code-class">ILoggr</font> <font class="code-method">launch</font>:<font class="code-system-keyword">nil</font>];
+}
+</font></pre><br>
+
+This line of code sends a message to the ILoggr server validating the application ID and recording a launch for this application on this phone.  
+Since all calls to the back end server are asynchronous, a callback can be included to call when the operation is completed.  
+<br><br>
+Once this code is deployed and in use, you can produce graphical reports that show the number of unique users for your application over a particular time period and also a breakdown of locations for the users (if enabled).
+<br><br>
+The following code added to your application will allow tracking of the usage duration for your application:
+<br><pre><font face="monaco" size=2>
+- (<font class="code-system-keyword">void</font>)applicationWillTerminate:(<font class="code-system-class">UIApplication</font> *)application {    
+    <font class="code-comment">// Record the duration of the application use</font>
+    [<font class="code-class">ILoggr</font> <font class="code-method">exit</font>];
+}
+</font></pre><br>
+This will log the total time of usage for the application and can be used to generate duration analysis graphs.
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-10317372-1");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+</body>
+<html>

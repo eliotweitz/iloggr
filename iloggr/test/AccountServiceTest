@@ -1,0 +1,70 @@
+#!/bin/bash
+#
+# Tests Account JSON services
+#
+function usage() {
+  echo "Usage: $0 [-h] [-n] [-e] [-p]"
+  echo "  -h show this help message"
+  echo "  -n Name for the test account (test account)"
+  echo "  -e Email for the test account (eliot@iloggr.com)"
+  echo "  -p Password for the test account (abc)"
+  (( $# > 0 )) && echo "$@"
+  exit 1
+}
+
+n="test account"
+p="abc"
+e="eliot@iloggr.com"
+
+while getopts ":hn:e:p:" opt; do
+  case ${opt} in
+    h) usage;;
+    n) n=${OPTARG};;
+    e) e=${OPTARG};;
+    p) p=${OPTARG};;
+    *) usage;;
+  esac
+done
+
+
+accountName="{\"__jsonclass__\":\"String\", \"value\":\"$n\"}"
+email="{\"__jsonclass__\":\"String\", \"value\":\"$e\"}"
+password="{\"__jsonclass__\":\"String\", \"value\":\"$p\"}"
+phone='{"__jsonclass__":"String", "value":"1234567890"}'
+appName='{"__jsonclass__":"String", "value":"Test App"}'
+
+
+echo "Creating test accont: $n"
+echo "Test createAccount(String name, String email, String password, String phone)"
+echo
+./client -s account "{\"method\":\"createAccount\", \"parameters\":[$accountName, $email, $password, $phone]}" > result
+result=`cat result | cut -d'{' -f2 | cut -d',' -f1 | cut -d':' -f2`
+error=`cat result | cut -d'{' -f2 | cut -d',' -f2 | cut -d':' -f2`
+echo "$error"
+if (error < 0); then
+  echo "Error: $error"
+else
+  echo "Success creating account"
+fi
+
+echo 
+echo "User account: $n created, please look in email for: $e and activate account with link"
+echo "Enter the security token value: "
+read st
+securityToken="{\"__jsonclass__\":\"String\", \"value\":\"$st\"}"
+
+echo "Test authenticateAccount(String accountName, String password)"
+echo
+./client -s account "{\"method\":\"authenticateAccount\", \"parameters\":[$accountName, $password]}"
+echo
+echo "Test createNewApplication(String securityToken, String appName)"
+echo
+./client -s account "{\"method\":\"createNewAppplication\", \"parameters\":[$securityToken, $testApp]}" 
+echo
+echo "Test getApplications(String token)"
+echo
+./client -s account "{\"method\":\"getApplications\", \"parameters\":[$securityToken]}" 
+
+
+
+

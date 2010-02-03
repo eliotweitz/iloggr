@@ -1,0 +1,60 @@
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	version="2.5">
+
+	<display-name>iLoggr Record Service</display-name>
+	<description>
+ 		Services client requests to log events
+	</description>
+
+    <welcome-file-list>
+        <welcome-file>ILoggr.html</welcome-file>
+        <welcome-file>TestAccountService.html</welcome-file>
+    </welcome-file-list>
+    
+	<servlet>
+    	<servlet-name>json-dispatcher</servlet-name>
+    	<servlet-class>com.iloggr.server.JSON.JSONServiceDispatcher</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>json-dispatcher</servlet-name>
+		<url-pattern>/json</url-pattern>
+	</servlet-mapping>
+	
+	<!-- TODO(jsirois): eliminate these? -->
+	<servlet-mapping>
+		<servlet-name>json-dispatcher</servlet-name>
+		<url-pattern>/record</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>json-dispatcher</servlet-name>
+		<url-pattern>/account</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>json-dispatcher</servlet-name>
+		<url-pattern>/provision</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>json-dispatcher</servlet-name>
+		<url-pattern>/report</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+    	<servlet-name>rest-dispatcher</servlet-name>
+    	<servlet-class>com.iloggr.server.RESTServiceDispatcher</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>rest-dispatcher</servlet-name>
+		<url-pattern>/rest/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+    	<servlet-name>gwt-dispatcher</servlet-name>
+    	<servlet-class>com.iloggr.server.GWTServiceDispatcher</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>gwt-dispatcher</servlet-name>
+		<url-pattern>/@gwt.dispatcher.path@</url-pattern>
+	</servlet-mapping>
+</web-app>

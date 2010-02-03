@@ -1,0 +1,194 @@
+/** Add css rules here for your application. */
+
+
+/** Example rules used by the template application (remove for your app) */
+h1 {
+  font-size: 2em;
+  font-weight: bold;
+  color: #333333;
+  margin: 40px 0px 70px;
+  text-align: center;
+}
+
+h2 {
+   font-size: 2.5em;
+   font-weight: bold;
+   color: #333333;
+   text-align: center;
+}
+
+.topTitle {
+	font-size: 3.5em;
+	color: #0065a7;
+	font-weight: bold;
+}
+
+.CenterFrame {
+	border: 0px;
+}
+
+.PanelFrameTitle {
+	font-size: 2em;
+	color: black
+    font-weight: bold;
+}
+	       
+.showBorder {
+	border-style: solid;
+	border-color: #BBBBBB;
+	}
+
+.gwt-MenuItem {
+	font-size: 1em;
+	color: #666666;
+	font-weight: bold;
+	}
+	
+.menuItemSelected {
+ border: 1px solid #BBBBBB;
+	}
+	
+.gwt-MenuBar .gwt-MenuItem-selected {
+  border: 1px solid #BBBBBB;
+ }
+ 
+.iloggr-MenuItem {
+    font-size: 1em;
+    color: #666666;
+ }
+
+.fieldrequired {
+    background: pink;
+}
+
+.signup {
+    color: darkblue;
+    font-size: large;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.panelHeader {
+	font-weight: bold;
+	color: darkGreen;
+}
+
+.statusMessage {
+	font-size: large;
+	font-weight: bold;
+	color: #333333;
+}
+
+.statusErrorMessage {
+    font-size: large;
+    font-weight: bold;
+    color: red;
+}
+
+.sendButton {
+  display: block;
+  font-size: 16pt;
+}
+
+.gwt-DialogBox {
+  width: 400px;
+}
+
+.gwt-Label {
+    font-size: 1em;
+    font-weight: bold;
+    color: #333333;
+}
+
+.column-header {
+	font-size: 1.5em;
+	font-weight:bold;
+	color: #111111;
+}
+
+.iloggr-info-field {
+	font-size: 1em;
+	font-weight: normal;
+	color: #0081c6;
+}
+
+
+.iloggr-application-link {
+	    font-size: 1.5em;
+	    font-weight: bold;
+	    color: #0081c6
+	    text-decoration: underline;
+}
+
+.code-system-method {
+    font-size: 1em;
+	color: #35006f;
+}
+
+.code-method{
+    font-size: 1em;
+    color: #19474c;
+}
+
+.code-comment  {
+    font-size: 1em;
+	color: #007700;
+}
+
+.code-string{
+    font-size: 1em;
+    color: #de0500;
+}
+
+.code-class{
+	font-size: 1em;
+	color: #2e6f75;
+}
+
+.code-property{
+    font-size: 1em;
+    color: #2e6f75;
+}
+
+.code-system-class {
+    font-size: 1em;
+    color: #671f9b;
+}
+
+.code-system-keyword {
+    font-size: 1em;
+    color: #c10091;
+}
+
+.code-system-constant {
+	font-size: 1em;
+	color: #2800d2;
+}
+
+
+
+		
+	
+
+.dialogVPanel {
+  margin: 5px;
+}
+
+.serverResponseLabelError {
+  color: red;
+}
+
+/** Set ids using widget.getElement().setId("idOfElement") */
+#closeButton {
+  margin: 15px 6px 6px;
+}
+
+.cw-FlexTable tr {
+  border: 1px solid #BBBBBB;
+  padding: 3px;
+}
+
+.cw-FlexTable-buttonPanel td {
+  border: 0px;
+}

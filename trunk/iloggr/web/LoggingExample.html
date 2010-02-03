@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link type="text/css" rel="stylesheet" href="ILoggr.css">
+<title>Logging Examples</title>
+</head>
+<body>
+iLoggr supports three major types of logging in your application:
+<br>
+<br>1. You can create and increment counters that can report the number of times a particular
+event occurs<br>
+2.  You can log a string or numerical value.<br>
+3.  You can log the current location of the phone.<br>
+<br>
+Counters can be useful for keeping track of how often a condition occurs whether it is a feature of a game that has been 
+selected or an error condition that needs to be tracked.<br><br>
+More conventional logging can be done at any point of the iPhone application that can record string or numerical (double) data.  This information
+ can be automatically augmented with the phone location (lat, lon) if location has been enabled.  
+<br>
+The following code added to your application will log a custom generated in your application:
+<br><pre><font size=2 face="monaco">
+    <font class="code-comment">// Record an exceptional condition</font>
+    <font class="code-system-class">NSString</font>* eDesc = [<font class="code-system-class">NSString</font> <font class="code-system-method">stringWithFormat</font>:<font class="code-string">@"Exception in drawing routine drawShape: %@"</font>, [ex <font class="code-method">stringValue</font>]];
+    [<font class="code-class">ILoggr</font> <font class="code-method">record</font>:eDesc <font class="code-method">callback</font>:<font class="code-system-keyword">nil</font>];
+</font></pre><br>
+This line of code sends a message to the ILoggr server validating the application ID and recording a launch for this application on this phone.  
+Since all calls to the back end server are asynchronous, a callback can be included to call when the operation is completed.  
+<br><br>
+Once this code is deployed and in use, you can produce graphical reports that show the number of unique users for your application over a particular time period and also a breakdown of locations for the users (if enabled).
+<br><br>The following code shows how you can log a data value: <br>
+<pre><font size=2 face="monaco">
+    <font class="code-comment">// Record a value</font>
+    [<font class="code-class">ILoggr</font> <font class="code-method">recordWithData</font>:<font class="code-string">@"chats sent"</font> <font class="code-method">data:</font>chatCount <font class="code-method">callback</font>:<font class="code-system-keyword">nil</font>];
+</font></pre><br>
+
+If the iLoggr library was initialized using the "launchWithLocationEnabled" method, both of the example method calls above would have also logged the phone's latitude and longitude along with the
+string and data values if the user opted into providing their location. 
+<br>
+Below is a line of code that will increment an application counter:
+<br><pre>
+  <font size=2 face="monaco"><font class="code-comment">// Increment the "reached level 3" counter</font>
+    [<font class="code-class">ILoggr</font> <font class="code-method">incrementCounter</font>:<font class="code-string">@"Level3Counter"</font> <font class="code-method">callback</font>:<font class="code-system-keyword">nil</font>];
+</font><br>
+</pre>
+This code will increment a counter named "Level3Counter" by 1.  This could be useful for tracking how many time a level of a game has been reached.
+ 
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-10317372-1");
+pageTracker._trackPageview();
+} catch(err) {}</script></body>
+<html>

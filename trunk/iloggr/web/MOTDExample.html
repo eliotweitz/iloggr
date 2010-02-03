@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link type="text/css" rel="stylesheet" href="ILoggr.css">
+<title>What is iLoggr?</title>
+</head>
+<body>
+Have you ever launched an iPhone application and seen a pop-up announcement (message of the day) for all users of the app?  ILoggr gives all applications 
+the ability to show a message through a simple local API call.  The developer can update or change 
+the message on this portal for immediate distribution to all users of the application.  Below, we see an example of the code required to get the
+message of the day for the application from the iLoggr service and display it as a pop-up dialog in the application:
+<br><br><pre><font face="monaco" size=2>
+<font class="code-comment>// Initialize the library
+[<font class="code-class">ILoggr</font> <font class="code-method">launch</font>:[<font class="code-class">ILCallback</font> <font class="code-method">new</font>:<font class="code-system-keyword">self</font> <font class="code-method">selector</font>:<font class="code-system-keyword">@selector</font>(<font class="code-method">ILoggrLaunched</font>:)]];
+<br>
+<font class="code-comment">// Async callback once library has been initialized</font>
+(<font class="code-system-keyword">void</font>)ILoggrLaunched:(<font class="code-class">ILResponse</font>*)response {
+    if ([response <font class="code-method">hasError</font>]) {
+        NSLog(<font class="code-string">@"Error launching iLoggr: %@"</font>, response.<font class="code-property">errorMessage</font>);
+    } else {
+     <font class="code-comment">// Get the message-of-the-day for this application</font>
+    [<font class="code-class">ILoggr</font> <font class="code-system-method">getAnnouncement</font>:[<font class="code-method">ILCallback</font> <font class="code-method">new</font>:<font class="code-system-keyword">self</font> selector:<font class="code-system-keyword">@selector</font>(<font class="code-method">showMOTD:</font>)]];
+    }
+  }
+<br>
+<font class="code-comment">// Async callback to display fetched message-of-the-day</font>
+(<font class="code-system-keyword">void</font>)showMOTD:(<font class="code-class">ILResponse</font>*)response {
+    <font class="code-system-class">NSString</font>* message;
+    if ([response <font class="code-method">hasError</font>]) {
+        NSLog(<font class="code-string">@"Error getting MOTD message: %@"</font>, response.<font class="code-property">errorMessage</font>);
+    } else {
+        message = response.<font class="code-property">result</font>;
+        if (message != [<font class="code-system-class">NSNull</font> <font class="code-system-method">null</font>] ) {
+           <font class="code-system-class">UIAlertView</font>* dlg = [[<font class="code-system-class">UIAlertView</font> <font class="code-system-method">alloc</font>] <font class="code-method">initWithTitle</font>:<font class="code-string">@"MOTD"</font> <font class="code-method">message</font>:message <font class="code-method">delegate</font>:<font class="code-system-keyword">nil</font> 
+           <font class="code-method">cancelButtonTitle</font>:<font class="code-string">@"OK"</font> <font class="code-method">otherButtonTitles</font>:<font class="code-system-keyword">nil</font>];
+           [dlg <font class="code-method">show</font>];
+           [dlg <font class="code-method">release</font>];
+        }
+    } // else
+ }
+ </font>
+ </pre>
+ <script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-10317372-1");
+pageTracker._trackPageview();
+} catch(err) {}</script></body>
+</html>

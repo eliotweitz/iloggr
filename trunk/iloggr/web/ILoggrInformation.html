@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link type="text/css" rel="stylesheet" href="ILoggr.css">
+<title>What is iLoggr?</title>
+</head>
+<body>
+ iLoggr is a new service to provide iPhone application developers critical information about how their apps are being used and to remotely control and track their usage.  
+ <br><br>Currently, most iPhone applications are built to be standalone games or applications with no network connectivity or back-end services.   
+ The iLoggr service allows iPhone developers to get some of the benefits of a networked application (monitoring, control, security) without 
+ having to build the infrastructure themselves.  Simple code included in the application sends light-weight messages to a service that
+ logs the "events" in a database.  Developers can run reports to find out how and when their application is being used. 
+<br><br>
+iLoggr is very easy to use.  A statically linked library is included into the application along with a header file (ILoggr.h) and application identity
+file.  The application developer then makes simple calls to the ILoggr class object to log events and get application specific provisioning information.
+<br><br>
+For example, the following code will allow a developer to track the number of unique iPhone users and the duration of use in a report:
+<br><pre><font face="monaco" size=2>
+    <font class="code-comment">// Set up global access to iLoggr service</font>
+    [<font class="code-class">ILoggr</font> <font class="code-method">launch</font>:[<font class="code-class">ILCallback</font> <font class="code-method">new</font>:<font class="code-system-keyword">self</font> selector:<font class="code-system-keyword">@selector</font>(<font class="code-method">ILoggrLaunched:</font>)]];
+</font></pre><br>
+This line of code sends a message to the ILoggr server validating the application ID and recording a launch for this application on this phone.  
+Since all calls to the back end server are asyncrhonous, a callback can be included to call when the operation is completed.  This callback is optional and could have the argument "nil".
+<br><br>
+The following code added to your application will allow tracking of the usage duration for your application:
+<br><pre><font face="monaco" size=2>
+- (<font class="code-system-keyword">void</font>)applicationWillTerminate:(<font class="code-system-class">UIApplication</font> *)application {    
+    <font class="code-comment">// Record the duration of the application use</font>
+    [<font class="code-class">ILoggr</font> <font class="code-method">exit</font>];
+}
+</font></pre><br>
+This will log the total time of usage for the application and can be used to generate duration analysis graphs.
+<br><br>
+Have you ever launched an iPhone application and seen a pop-up announcement (message of the day) for all users of the app?  ILoggr gives all applications 
+the ability to show a message through a simple local API call.  The developer can update or change 
+the message on this portal for immediate distribution to all users of the application.  Below, we see an example of the code required to get the
+message of the day for the application from the iLoggr service and display it as a pop-up dialog in the application:
+<br><br><pre><font face="monaco" size=2>
+<font class="code-comment">// Get the message-of-the-day for this application</font>
+[<font class="code-class">ILoggr</font> <font class="code-system-method">getAnnouncement</font>:[<font class="code-method">ILCallback</font> <font class="code-method">new</font>:<font class="code-system-keyword">self</font> selector:<font class="code-system-keyword">@selector</font>(<font class="code-method">showMOTD:</font>)]];
+<br>
+<font class="code-comment">// Async callback to display fetched message-of-the-day</font>
+(<font class="code-system-keyword">void</font>)showMOTD:(<font class="code-class">ILResponse</font>*)response {
+    <font class="code-system-class">NSString</font>* message;
+    if ([response <font class="code-method">hasError</font>]) {
+        NSLog(<font class="code-string">@"Error getting message: %@"</font>, response.<font class="code-property">errorMessage</font>);
+    } else {
+        message = [response.<font class="code-property">result</font> <font class="code-method">stringValue];
+    }
+    if (message != [<font class="code-system-class">NSNull</font> <font class="code-system-method">null</font>] ) {
+        <font class="code-system-class">UIAlertView</font>* dlg = [[<font class="code-system-class">UIAlertView</font> <font class="code-system-method">alloc</font>] <font class="code-method">initWithTitle</font>:<font class="code-string">@"MOTD"</font> <font class="code-method">message</font>:message <font class="code-method">delegate</font>:<font class="code-system-keyword">nil</font> 
+        <font class="code-method">cancelButtonTitle</font>:<font class="code-string">@"OK"</font> <font class="code-method">otherButtonTitles</font>:<font class="code-system-keyword">nil</font>];
+        [dlg <font class="code-method">show</font>];
+        [dlg <font class="code-method">release</font>];
+    }
+ }</font>
+ </pre>
+ 
+ All logging information can be retrieved via an easy to use web interface.  Logging data can be viewed or downloaded as a comma delimited (excel compatible) file
+ for off-line processing.  <br><br>
+ Major features of iLoggr include:<br>
+ <ul>
+<li>Track application usage including unique phones/users and application use duration statistics.</li>
+<li>See where most of your users are located geographically.</li>
+<li>Perform remote logging for applications.</li>
+<li>Popup message-of-the-day in an application where message can be changed via web interface.</li>
+<li>Additional remote control features for your applications.</li>
+</ul><br>
+We also intend on distributing the source for the static API library so, if you are interested, you can see exactly what is being transmitted from the phone.  Messages sent from the phone to the 
+back-end servers are light-weight, JSON formatted messages.
+ 
+ <script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-10317372-1");
+pageTracker._trackPageview();
+} catch(err) {}</script></body>
+</html>

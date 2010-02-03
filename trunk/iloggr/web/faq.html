@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link type="text/css" rel="stylesheet" href="ILoggr.css">
+ <title>Contact Us</title>
+</head>
+<body>
+ <a href="ILoggrInformation.html">What is iLoggr?</a><br>
+ <a href="#How">How do I use it with my iPhone application?</a><br>
+ <a href="#loc">How does it collect and send phone location to the server?</a><br>
+ <a href="#Cost">What does it cost?</a><br>
+ <a href="#Doy">How does it work, why not just do this myself?</a><br>
+ <a href="#reports">What kind of reports can I generate from the data collected?</a><br>
+ <a href="#battery">How will this affect my applications use of battery on the phone?</a><br>
+ <br>
+
+ <a name="#How">
+ <b>How do I use it with my iPhone Application?</b><br><br>
+ We've made iLoggr very easy to integrate into your iPhone application.  You need three things to get you app
+ recording information:<br><br>
+ 1. Download and include a static library in your XCode project.<br>
+ 2. Download and include a security plist file containing your account and application identifier into your XCode project.
+ <br>3. Place method to ILoggr static class to record information.  Example:
+ <br><pre><font size=2 face="monaco">
+    [<font class="code-class">ILoggr</font> <font class="code-method">launchWithLocationEnabled</font>:[<font class="code-class>ILCallback</font> new:<font class="code-system-class">self</font> selector:<font class="code-system-class">@selector</font>(<font class="code-method">ILoggrLaunched:</font>)]];
+</font>
+</pre>
+
+<br>Will initialize iLoggr to get location and record the launch of the application.  This one line of code makes it possible to 
+produce a report that will show how many times your application was launched over a specified period of time and a display on a map of where
+the user was who launched the application.   The callback &quot;ILoggrLaunched&quot; is optional but useful if you want to wait for iLoggr to initialize for susequent logging calls.<br>
+</a>
+<br><br>
+<a name="#How">
+ <b>How does it collect and send phone location to the server?</b><br><br>
+ Currently, the iLoggr library on the iPhone has the following static settings:<br>
+ <br>desiredAccuracy = kCLLocationAccuracyKilometer;
+<br>distanceFilter = 5000;
+<br><br>It is assumed that resolution above 1 kilometer is not necessary for generating usage statistics.  In the future we might add an API call that would allow the developer to change these values.  We believe with these settings, the power usage penalty for recording location will me minimalized for most iPhone users.
+ </a><br><br>
+ <a name="#Cost"><b>How much does it cost?</b><br><br>
+ TBD.   There will be a reasonable monthly charge plus a one time set up fee for all users.<br></a><br>
+ <a name="#Doy"><b>Why not just do this myself?</b><br><br>
+ Though it seems straight forward, it is a significant effort to build a scalable logging system for your application that has the flexibility and reporting capabilities of iLoggr.   It is just one other thing that you need to implement taking your development and testing effort away from the core application features you need to develop.  There is also significant trouble and expense developing and maintaining  backend collection and reporting service for 24/7 usage.<br><br>iLoggr is included into your iPhone application as a lightweight static library that collects and reports information via JSON to a back-end service hosted in the Amazon Web Services (AWS) Elastic Computing Cloud (EC2).   Amazon provides high availability and scalability for iLoggr servers to collect data from the millions of iPhones across the world.   All recorded data is sent into a reporting database (MySql) from which reports are generated through the iLoggr user portal also hosted by AWS EC2. 
+ <br><br>
+ Application provisioning parameters can be modified, counters reset, and reports generated through the portal UI or through a set of web services (JSON, REST, GWT).
+ </a>
+ <br><br>
+ <a name="#reports"><b>What kind of reports can I generate from the data collected?</b>
+ <br><br>
+ Currently there are two styles of reports: A unique visitor report that gives you the number of times your application has been launched by a unique iPhone in a given period of time.  
+ For instance, you can see how many times per hour your application was launched over the last day, week, or month.  This information can provide powerful indicators of your application usage as
+ well as usage patterns.
+ <br><br>
+ The second type of report is a usage map report that shows you on a map where your users are when they use your application.  This gives you 
+ and idea of the geographic diversity of your application usage including hot spots of high usage and areas where advertising might
+ be better spent.
+ </a><br><br>
+ <a name="#battery">
+ <b>How will this affect my applications use of battery on the phone?</b><br><br>
+ iLoggr is designed to do minimal communication to the back-end server.  This is mostly controlled by the developer using iLoggr.   Firing up the radio to send data and using the GPS/Location capabilities are the two major users of battery.  If logging is kept to a minimum, radio usage should also be minimal.  For applications that want to log a lot of information, we suggest you save and bunch that information together and do the logging in batches since once the radio is on, the cost of extra data transmission is less.
+ <br><br>
+ For location power usage, you can use iLoggr without location enabled or if you do enable it, it will save the latest position fix with 1 km accuracy and only transmit that to the server when you make a logging call.
+ </a>
+ <script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-10317372-1");
+pageTracker._trackPageview();
+} catch(err) {}</script></body>
+</html>

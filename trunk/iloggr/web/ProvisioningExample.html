@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link type="text/css" rel="stylesheet" href="ILoggr.css">
+<title>Provisioning Example</title>
+</head>
+<body>
+iLoggr supports the ability for your application to retrieve provisioning settings from the iLoggr server to control how your apps behave.  This can
+be tremendously useful for changing certain behavioral aspects of the iPhone code without creating a whole new software release.  
+<br><br>
+Any place there is a constant value in your code, you can replace it with a provisioning parameter that can remotely set that value on startup.  For example, image a game that has time values for how long the user can play until a score is finalized.  If this setting is stored as a provisioning parameter in iLoggr, it can be changed so all <i>existin</i> g version of the<br>iPhone application now have that value set.
+
+Provisioning parameters and their default values can be easily added to an application using the iLoggr web UI then accessed by your iPhone application as follows:
+<br><br>
+<pre>
+<font size=2 face="monaco">
+<font class="code-comment">// Get the game session time interval provisioning parameter for the app</font>
+[<font class="code-class">ILoggr</font> <font class="code-method">getParameter</font>:<font class="code-string">@"GameSessionTime"</font> <font class="code-method">callback</font>:[<font class="code-class">ILCallback</font> <font class="code-method">new</font>:<font class="code-system-keyword">self</font> <font class="code-method">selector</font>:<font class="code-system-keyword">@selector</font>(<font class="code-method">gotSessionTime</font>:)]];
+ 
+<font class="code-comment">// Async callback to set the fetched SystemGameTime provisioning parameter</font>
+(<font class="code-system-keyword">void</font>)gotSessionTime:(<font class="code-class">ILResponse</font>*)response {
+    <font class="code-system-class">NSString</font>* message;
+    if ([response <font class="code-method">hasError</font>]) {
+        NSLog(<font class="code-string">@"Error getting GameSessionTime provisioning parameter: %@"</font>, response.<font class="code-property">errorMessage</font>);
+        <font class="code-comment">// Set to default value</font>
+        appDelegate.<font class="code-property">gameSessionTime</font> = <font class="code-system-constant">300</font>; <font class="code-comment">// 5 minutes</font>
+    } else {
+        <font class="code-property">ILParameter</font>* param = response.<font class="code-property">result</font>; <font class="code-comment">
+        appDelegate.<font class="code-property">gameSessionTime</font> = [param <font class="code-method">integerValue]; <font class="code-comment">// Value is in seconds</font>
+    }
+ }
+
+ </font>
+    
+}
+
+</font></pre><br>
+This line of code sends a message to the ILoggr server requesting the named parameter "GameSessionTime".  Since the call is asynchronous, a callback is
+registered called "gotSessionTime" that is called when the value is fetched (milliseconds later). The application can then use that parameter for the rest
+of the user session.   
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-10317372-1");
+pageTracker._trackPageview();
+} catch(err) {}</script></body>
+<html>

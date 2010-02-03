@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link type="text/css" rel="stylesheet" href="ILoggr.css">
+<title>iLoggr Examples</title>
+</head>
+<body>
+The following code added to your application will allow tracking of the number of unique iPhone users and the duration of use in a report:
+<br><pre><font face="monaco" size=2>
+- (<font class="code-system-keyword">void</font>)applicationDidFinishLaunching:(<font class="code-system-class">UIApplication</font> *)application {    
+    <font class="code-comment">// Record launch of application</font>
+    [<font class="code-class">ILoggr</font> <font class="code-method">launch</font>:<font class="code-system-keyword">nil</font>];
+}
+</font></pre><br>
+This line of code sends a message to the ILoggr server validating the application ID and recording a launch for this application on this phone.  
+Since all calls to the back end server are asynchronous, a callback can be included to call when the operation is completed.  
+<br><br>
+Once this code is deployed and in use, you can produce graphical reports that show the number of unique users for your application over a particular time period and also a breakdown of locations for the users (if enabled).
+<br><br>
+If you are interested in logging where the user's phone is located when the application was launched, you would use the following line of code:
+<br><pre><font face="monaco" size=2>
+- (<font class="code-system-keyword">void</font>)applicationDidFinishLaunching:(<font class="code-system-class">UIApplication</font> *)application {    
+    <font class="code-comment">// Record launch of application with location enabled</font>
+    [<font class="code-class">ILoggr</font> <font class="code-method">launchWithLocationEnabled</font>:<font class="code-system-keyword">nil</font>];
+}
+</font></pre>
+<br>This will initialize the location framework on the phone which will ask the user if they wish to provide their location information and if they agree, a location fix will be obtained and sent up to the server along with any logging calls.
+<br><br>
+The following code added to your application will allow tracking of the usage duration for your application:
+<br><pre><font face="monaco" size=2>
+- (<font class="code-system-keyword">void</font>)applicationWillTerminate:(<font class="code-system-class">UIApplication</font> *)application {    
+    <font class="code-comment">// Record the duration of the application use</font>
+    [<font class="code-class">ILoggr</font> <font class="code-method">exit</font>];
+}
+</font></pre><br>
+This will log the total time of usage for the application and can be used to generate duration analysis graphs.
+
+ 
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-10317372-1");
+pageTracker._trackPageview();
+} catch(err) {}</script></body>
+<html>

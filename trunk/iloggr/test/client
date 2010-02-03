@@ -1,0 +1,36 @@
+#!/bin/bash
+#
+# Posts json rpc requests to iLoggrServer services
+#
+
+function usage() {
+  echo "Usage: $0 [-h] [-u] [-s] [<json data>]"
+  echo "  -h show this help message"
+  echo "  -u url of base service (http://localhost:8080/iLoggrServer)"
+  echo "  -s service to post to (record)"
+  echo "  <json data> the data to post - if absent will be read from stdin"
+  (( $# > 0 )) && echo "$@"
+  exit 1
+}
+
+urlbase="http://localhost:8080/iLoggrServer"
+service="record"
+data="@-"
+
+while getopts ":hu:s:" opt; do
+  case ${opt} in
+    h) usage;;
+    u) urlbase=${OPTARG};;
+    s) service=${OPTARG};;
+    *) usage;;
+  esac
+done
+
+(( ${OPTIND} > 1 )) && shift $((${OPTIND} -1 ))
+(( $# > 0 )) && data="$*"
+  
+curl \
+  --url "${urlbase}/${service}" \
+  --header "content-type: text/x-bng11-rpc" \
+  --data "${data}"
+

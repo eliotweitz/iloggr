@@ -1,0 +1,151 @@
+<project name="java">
+    <dirname property="basedir.java" file="${ant.file.java}"/>
+    
+    <import file="${basedir.java}/project.xml"/>
+        
+    <property name="dir.conf" value="conf"/>
+    <property name="dir.src" value="src"/>
+    <property name="dir.web" value="web"/>
+    <property name="dir.lib" value="lib"/>
+    
+    <property name="dir.war" value="${dir.artifacts}/war"/>
+    <property name="dir.war.webinf" value="${dir.war}/WEB-INF"/>
+    <property name="dir.war.classes" value="${dir.war.webinf}/classes"/>
+    <property name="dir.javadoc" value="${dir.artifacts}/javadoc"/>
+	<property name="dir.extra.compile-libs" value="${dir.artifacts}/extra/compile-libs"/>
+	
+    <property name="javac.debug" value="true"/>
+    <property name="javac.lintlevel" value="all"/><!-- (none|all|...) -->
+
+    <patternset id="patternset.javasrc">
+        <include name="**/*.java"/>
+    </patternset>
+        
+    <patternset id="patternset.resources"
+        description="binary resources">
+        
+        <include name="**/*.gif"/>
+        <include name="**/*.png"/>
+        <include name="**/*.jpg"/>
+        <include name="**/*.ico"/>
+    </patternset>
+    
+    <patternset id="patternset.conf"
+        description="filterable configuration files">
+        
+        <include name="**/*.properties"/>
+        <include name="**/*.xml"/>
+    </patternset>
+    
+    <patternset id="patternset.lib"
+        description="common libraries needed for both builds and deployments">
+        
+        <include name="**/*.jar"/>
+        <exclude name="ant/**"/>
+        <exclude name="delete/**"/>
+    </patternset>
+    
+    <fileset id="fileset.ant-libs" dir="${dir.lib}"
+        description="libraries needed for custom ant tasks">
+            
+        <include name="ant/**/*.jar"/>
+    </fileset>
+            
+    <fileset id="fileset.compile-libs" dir="${dir.lib}"
+        description="libraries needed to compile the project standalone">
+        
+        <patternset refid="patternset.lib"/>
+        <include name="ext/**/*.jar"/>
+    </fileset>
+    
+	<fileset id="fileset.extra-compile-libs" dir="${dir.extra.compile-libs}">
+		<include name="**/*.jar"/>
+	</fileset>
+	
+    <fileset id="fileset.src" dir="${dir.src}">
+        <patternset refid="patternset.javasrc"/>
+    </fileset>
+        
+    <path id="path.classpath">
+        <fileset refid="fileset.compile-libs"/>
+    	<fileset refid="fileset.extra-compile-libs"/>
+    </path>
+    
+    <path id="path.classpath.ant">
+        <path refid="path.classpath"/>
+        <fileset refid="fileset.ant-libs"/>
+    </path>
+
+    <target name="init" depends="project.init">
+        <mkdir dir="${dir.artifacts}"/>
+        <mkdir dir="${dir.war.classes}"/>
+        <mkdir dir="${dir.javadoc}"/>
+        <mkdir dir="${dir.extra.compile-libs}"/>
+    </target>
+    
+    <macrodef name="m_javac">
+        <attribute name="classpathref"/>
+        <element name="src" implicit="true" optional="false"/>
+        
+        <sequential>
+            <javac 
+                source="1.5"
+                target="1.5"
+                listfiles="false"
+                debug="${javac.debug}"
+            	debuglevel="lines,vars,source"
+                destdir="${dir.war.classes}"
+                classpathref="@{classpathref}">
+                
+                <compilerarg value="-Xlint:${javac.lintlevel}"/>
+                
+                <src/>
+            </javac>
+        </sequential>
+    </macrodef>
+    <echoproperties></echoproperties>
+    <target name="compile" depends="init"
+        description="compile the source">
+        
+        <m_javac classpathref="path.classpath">
+            <src path="${dir.src}"/>
+        </m_javac>
+    </target>
+    
+    <target name="build" depends="compile, loadfilters-from-properties">
+        <m_copy dir="${dir.war.classes}" filter="true">
+            <fileset dir="${dir.conf}">
+                <patternset refid="patternset.conf"/>
+            </fileset>
+        	<fileset dir="${dir.src}">
+                <patternset refid="patternset.conf"/>
+            </fileset>
+        </m_copy>
+        <m_copy dir="${dir.war.classes}">
+            <fileset dir="${dir.src}">
+                <patternset refid="patternset.resources"/>
+            </fileset>
+        </m_copy>
+    </target>
+    
+    <property name="javadoc.isuptodate.file" value="${dir.artifacts}/.javadoc.lastgen"/>
+
+    <target name="javadoc-uptodate" depends="init">
+        <uptodate property="javadoc.isuptodate" targetfile="${javadoc.isuptodate.file}">
+            <srcfiles refid="fileset.src"/>
+        </uptodate>
+    </target>
+    
+    <target name="javadoc" depends="javadoc-uptodate, init" unless="javadoc.isuptodate"
+        description="generate javadoc from the source">
+        
+        <javadoc
+            access="protected"
+            author="true"
+            sourcepath="${dir.src}"
+            destdir="${dir.javadoc}"
+            classpathref="path.classpath"/> 
+        
+        <touch file="${javadoc.isuptodate.file}"/>
+    </target>
+</project>

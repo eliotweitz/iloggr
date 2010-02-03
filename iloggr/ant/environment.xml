@@ -1,0 +1,82 @@
+<project name="environment">
+    <dirname property="basedir.environment" file="${ant.file.environment}"/>
+    
+    <property environment="env"/>
+    
+    <!-- development deployment environment  
+	<property name="build.environment" value="local"/>  -->  
+	
+	 	
+    <!-- production environment   -->
+    <property name="build.environment" value="prod"/>
+	
+   
+	
+   <property file="${basedir}/${build.environment}.deploy.properties"/>
+    
+    <!-- load developer local environment settings to fill in any blanks -->
+    <property name="build.user.local.propertiesfile" value="${user.home}/.${ant.project.name}.properties"/>
+    <property file="${build.user.local.propertiesfile}"/>
+    <property file="${user.home}/.build.properties"/>
+    
+    <scriptdef name="loadfilters" language="javascript"
+        description="adds a filter for every defined property">
+        
+        <![CDATA[
+            var project = self.getProject();
+            var entries = project.properties.entrySet().iterator();
+            while (entries.hasNext()) {
+                var entry = entries.next();
+                project.addFilter(entry.getKey(), entry.getValue());
+            }
+        ]]>
+    </scriptdef>
+    
+    <macrodef name="m_assertproperty"
+        description="ensure a required property is defined">
+        
+        <attribute name="name"/>
+        <text name="message" trim="true"/>
+    	
+        <sequential>
+            <fail unless="@{name}">
+            	@{message}
+            </fail>
+        </sequential>
+    </macrodef>
+    
+	<macrodef name="m_assertimportproperty"
+        description="ensure a composed build file supplies the required properties for its imported targets">
+        
+        <attribute name="name"/>
+		<attribute name="import"/>
+		
+        <sequential>
+            <m_assertproperty name="@{name}">
+                Property @{name} is required by import @{import}
+            </m_assertproperty>
+        </sequential>
+    </macrodef>
+	
+	<macrodef name="m_assertlocalproperty"
+        description="ensure developer has an appropriate local property defined">
+        
+        <attribute name="name"/>
+        
+        <sequential>
+            <m_assertproperty name="@{name}">
+                Property @{name} needs to be defined for local builds.
+                Please add a line specifying @{name} to ${build.user.local.propertiesfile}:
+                echo "@{name}=YOURVALUE" >> ${build.user.local.propertiesfile}
+            </m_assertproperty>
+        </sequential>
+    </macrodef>
+	
+	<filterchain id="filterchain.expandproperties">
+        <expandproperties/>
+    </filterchain>
+	
+    <target name="loadfilters-from-properties">
+        <loadfilters/>
+    </target>
+</project>

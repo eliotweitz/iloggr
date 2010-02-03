@@ -1,0 +1,138 @@
+<project name="sql">
+    <dirname property="basedir.sql" file="${ant.file.sql}"/>
+        
+    <import file="${basedir.sql}/java.xml"/>
+    
+    <property name="dir.db" value="${basedir}/db"/>
+    <property name="dir.sql" value="${dir.db}/sql"/>
+    
+    <property name="mysql.host" value="localhost"/>
+    <property name="mysql.port" value="3306"/>
+    <property name="mysql.database" value="iLoggr"/>
+    <property name="mysql.connection.url" value="jdbc:mysql://${mysql.host}:${mysql.port}"/>
+    <property name="mysql.driver" value="com.mysql.jdbc.Driver"/>
+    <property name="mysql.user.name" value="iloggr"/>
+
+    <property name="hibernate.hbm2ddl.auto" value="validate"/>
+    
+    <macrodef name="m_generate-schema"
+        description="generates the database schema from the hibernate configuration">
+    
+        <attribute name="database" default="false"/>
+        <attribute name="file" default="/dev/null"/>
+        
+        <sequential>
+            <taskdef name="hibernatetool"
+                classname="org.hibernate.tool.ant.HibernateToolTask"
+                classpathref="path.classpath.ant"/>
+            
+            <hibernatetool destdir="/">
+                <classpath>
+                    <path path="${dir.war.classes}"/>
+                    <path refid="path.classpath"/>
+                </classpath>
+                <annotationconfiguration configurationfile="${dir.war.classes}/Hibernate.cfg.xml"
+                    namingstrategy="org.hibernate.cfg.ImprovedNamingStrategy"/>
+                <hbm2ddl
+                    export="@{database}"
+                    outputfilename="@{file}"
+                    format="true"
+                    haltonerror="true"/>
+            </hibernatetool>
+        </sequential>
+    </macrodef>
+    
+    <macrodef name="m_sql"
+        description="performs a sql statement against this project's configured db">
+    
+        <attribute name="user" default="${mysql.user.name}"/>
+        <attribute name="password" default="${mysql.user.password}"/>
+        <attribute name="database" default="${mysql.database}"/>
+        <attribute name="src"/>
+        
+        <sequential>
+            <sql classpathref="path.classpath"
+                driver="${mysql.driver}"
+                url="${mysql.connection.url}/@{database}"
+                userid="@{user}"
+                password="@{password}"
+            	src="@{src}"
+            	expandproperties="true"/>
+        </sequential>
+    </macrodef>
+     
+	<target name="assert-local-db-properties-set">
+        <m_assertlocalproperty name="mysql.root.password"/>
+		<m_assertlocalproperty name="mysql.user.password"/>
+        <m_assertlocalproperty name="mysql.database"/>
+	</target>
+		
+    <target name="drop-database" depends="assert-local-db-properties-set, init"
+        description="drops the database">
+
+        <m_sql user="root" password="${mysql.root.password}" database="mysql" src="${dir.sql}/dropdb.sql"/>
+    </target>
+
+	<target name="ensure-hibernate-configuration" depends="assert-local-db-properties-set, java.build"/>
+
+    <target name="create-database" depends="ensure-hibernate-configuration, init"
+        description="creates the database">
+
+        <m_sql user="root" password="${mysql.root.password}" database="mysql" src="${dir.sql}/createdb.sql"/>
+        <m_generate-schema database="true"/>
+    </target>
+    
+    <property name="schema.isuptodate.file" value="${dir.artifacts}/.schema.lastgen"/>
+
+    <target name="generate-schema-uptodate" depends="init">
+        <uptodate property="schema.isuptodate" targetfile="${schema.isuptodate.file}">
+            <srcfiles refid="fileset.src"/>
+        </uptodate>
+    </target>
+    
+    <target name="generate-schema" depends="generate-schema-uptodate, ensure-hibernate-configuration"
+    	unless="schema.isuptodate"
+        description="generates the database schema from the hibernate configuration and saves it to a file">
+        
+        <m_generate-schema file="${dir.artifacts}/schema.sql"/>
+        
+        <touch file="${schema.isuptodate.file}"/>
+    </target>
+    
+    <target name="generate-db-install" depends="assert-local-db-properties-set, generate-schema"
+        description="generates a sql file that can be used to install the database from scratch">
+        
+        <property name="setup.sql.file" value="${dir.artifacts}/setupdb.sql"/>
+        
+        <concat destfile="${setup.sql.file}" append="false" force="true">
+            <header trim="false" trimleading="true">
+                use mysql;
+                
+                -- drop the db if it already exists
+            </header>
+        	<filelist dir="${dir.sql}" files="dropdb.sql"/>
+        	<filterchain refid="filterchain.expandproperties"/>
+        </concat>
+    	<concat destfile="${setup.sql.file}" append="true">
+            <header trim="false" trimleading="true">
+                
+                -- create the db
+            </header>
+    		<filelist dir="${dir.sql}" files="createdb.sql"/>
+            <filterchain refid="filterchain.expandproperties"/>
+        </concat>
+    	<concat destfile="${setup.sql.file}" append="true">
+            <header trim="false" trimleading="true">
+                
+                -- create the tables, constraints, etc.
+                use ${mysql.database};
+            </header>
+            <filelist dir="${dir.artifacts}" files="schema.sql"/>
+        </concat>
+    	
+        <echo>
+            Database can be installed with:
+            mysql -u root -p &lt; ${setup.sql.file}
+        </echo>
+    </target>
+</project>

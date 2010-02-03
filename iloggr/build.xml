@@ -1,0 +1,38 @@
+<project name="iLoggrServer" default="build" basedir=".">
+    <dirname property="basedir.iLoggrServer" file="${ant.file.iLoggrServer}"/>
+
+	<property name="webapp.name" value="iLoggrServer"/>
+	
+	<import file="${basedir.iLoggrServer}/ant/java.xml"/>
+
+	<fileset id="iLoggrServer.fileset.gwt.client.src" dir="${dir.src}/com/iloggr">
+        <!-- Util module -->
+        <include name="gwt/util/client/**/*"/>
+        <include name="gwt/util/functional/**/*"/>
+        <include name="gwt/util/lang/**/*"/>
+        
+        <!-- Primary iLoggr client module (UI) -->
+        <include name="client/**/*"/>
+    </fileset>
+    <property name="gwt.fileset.client.src" value="iLoggrServer.fileset.gwt.client.src"/>
+    <property name="gwt.fileset.client.modules" value="com.iloggr.ILoggr"/>
+	<import file="${basedir.iLoggrServer}/ant/gwt.xml"/>
+	
+	<import file="${basedir.iLoggrServer}/ant/war.xml"/>
+	<import file="${basedir.iLoggrServer}/ant/sql.xml"/>
+
+	<property name="gwt.dispatcher.path" value="gwt"/>
+
+	<target name="init" depends="war.init">
+		<m_assertlocalproperty name="gwt.sdk.dir"/>
+				
+		<m_copy dir="${dir.extra.compile-libs}">
+			<fileset file="${gwt.sdk.dir}/gwt-user.jar"/>		
+		</m_copy>
+		<m_copy dir="${dir.extra.deploy-libs}">
+			<fileset file="${gwt.sdk.dir}/gwt-servlet.jar"/>		
+		</m_copy>
+	</target>
+	
+	<target name="build" depends="loadfilters-from-properties, gwtc, java.build"/>
+</project>

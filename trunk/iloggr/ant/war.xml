@@ -1,0 +1,86 @@
+<project name="war">
+	<dirname property="basedir.war" file="${ant.file.war}"/>
+	    
+    <import file="${basedir.war}/java.xml"/>
+
+    <m_assertimportproperty name="webapp.name" import="${ant.file.war}"/>
+
+    <property name="dir.war.libs" value="${dir.war.webinf}/lib"/>
+	<property name="dir.extra.deploy-libs" value="${dir.artifacts}/extra/deploy-libs"/>        
+	<property name="webapp.web.xml" value="${dir.web}/${webapp.name}.web.xml"/>        
+    
+    <patternset id="patternset.web"
+        description="filterable web files">
+        
+        <include name="**/*.html"/>
+        <include name="**/*.css"/>
+        <include name="**/*.js"/>
+        <include name="**/*.zip"/>
+    </patternset>
+    
+    <fileset id="fileset.deploy-libs" dir="${dir.lib}"
+        description="libraries suitable for deployment to a servlet container">
+        
+        <patternset refid="patternset.lib"/>
+        <exclude name="ext/**"/>
+    </fileset>
+
+	<fileset id="fileset.extra.deploy-libs" dir="${dir.extra.deploy-libs}">
+		<include name="**/*.jar"/>
+	</fileset>
+	
+    <target name="init" depends="java.init">
+        <mkdir dir="${dir.war.libs}"/>
+        <mkdir dir="${dir.extra.deploy-libs}"/>
+    </target>
+    
+    <target name="create-exploded-war" depends="build">
+    	<copy file="${webapp.web.xml}" tofile="${dir.war.webinf}/web.xml" filtering="true"/>
+         
+        <m_copy dir="${dir.war}" filter="true">
+            <fileset dir="${dir.web}">
+                <patternset refid="patternset.web"/>
+            </fileset>    
+        </m_copy>
+        
+        <m_copy dir="${dir.war}">
+            <fileset dir="${dir.web}">
+                <patternset refid="patternset.resources"/>
+            </fileset>
+        </m_copy>         
+        
+        <m_copy dir="${dir.war.libs}" flatten="true">
+            <fileset refid="fileset.deploy-libs"/>
+        	<fileset refid="fileset.extra.deploy-libs"/>
+        </m_copy>        
+    </target>
+    
+    <target name="war" depends="create-exploded-war" 
+        description="create war archive">
+    
+        <war destfile="${dir.artifacts}/${deploy.warfile.name}.war" basedir="${dir.war}"/>
+    </target>
+
+    <target name="deploy-war" depends="war"
+        description="deploy war to a local tomcat instance">
+    
+        <m_assertlocalproperty name="tomcat.home"/>
+        
+        <m_copy dir="${tomcat.home}/webapps">
+            <fileset file="${dir.artifacts}/${deploy.warfile.name}.war"/>
+        </m_copy>
+    </target>
+    
+    <target name="undeploy-war"
+        description="remove war and exploded war directory grom a local tomcat instance">
+    
+        <m_assertlocalproperty name="tomcat.home"/>
+        
+        <delete file="${tomcat.home}/webapps/${deploy.warfile.name}.war"/>
+        <delete dir="${tomcat.home}/webapps/${deploy.warfile.name}"/>
+    </target>
+    
+    <target name="redeploy-war" depends="undeploy-war, deploy-war"
+        description="remove war and replace with newly built"/>
+	
+</project>

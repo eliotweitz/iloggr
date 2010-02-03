@@ -1,0 +1,34 @@
+<project name="project">
+    <dirname property="basedir.project" file="${ant.file.project}"/>
+    
+    <import file="${basedir.project}/environment.xml"/>
+    
+    <property name="dir.artifacts" value="${basedir}/build"/>
+
+    <property name="build.copy.verbose" value="true"/>
+
+    <macrodef name="m_copy"
+        description="copy with the configured verbosity level">
+        
+        <attribute name="dir"/>
+        <attribute name="filter" default="false"/>
+        <attribute name="flatten" default="false"/>
+        <element name="filesets" implicit="true"/>
+        
+        <sequential>
+            <copy todir="@{dir}" filtering="@{filter}" flatten="@{flatten}" verbose="${build.copy.verbose}">
+                <filesets/>
+            </copy>
+        </sequential>
+    </macrodef>
+
+    <target name="init">
+        <mkdir dir="${dir.artifacts}"/>
+    </target>
+    
+    <target name="clean"
+        description="clean all build artifacts">
+        
+        <delete dir="${dir.artifacts}"/>
+    </target>
+</project>

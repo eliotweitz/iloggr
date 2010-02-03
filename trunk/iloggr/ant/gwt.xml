@@ -1,0 +1,107 @@
+<project name="gwt">
+    <dirname property="basedir.gwt" file="${ant.file.gwt}"/>
+    
+    <import file="${basedir.gwt}/java.xml"/>
+    
+	<m_assertimportproperty name="gwt.fileset.client.src" import="${ant.file.gwt}"/>
+	<m_assertimportproperty name="gwt.fileset.client.modules" import="${ant.file.gwt}"/>
+    <m_assertimportproperty name="webapp.name" import="${ant.file.gwt}"/>
+	
+	<path id="gwt.path.classpath">
+	    <path refid="path.classpath"/>
+	    <fileset dir="${gwt.sdk.dir}">
+	    	<include name="gwt-user.jar"/>
+	    	<include name="gwt-dev*.jar"/>
+    	</fileset>
+	</path>
+	
+    <property name="gwt.isuptodate.file" value="${dir.artifacts}/.gwt.lastbuilt"/>
+
+    <target name="gwt-uptodate" depends="init">
+        <uptodate property="gwt.isuptodate" targetfile="${gwt.isuptodate.file}">
+            <srcfiles refid="${gwt.fileset.client.src}"/>
+        </uptodate>
+    </target>
+
+	<property name="maxmemory" value="-Xmx256M"/>
+	
+	<macrodef name="m_rungwt">
+		<attribute name="mainclass"/>
+	    <element name="args" implicit="true" optional="true"/>
+		
+		<sequential>
+            <m_assertlocalproperty name="gwt.sdk.dir"/>
+            <m_assertlocalproperty name="gwt.java.home"/>
+            
+			<condition property="gwt.oophm.jar" value="${gwt.sdk.dir}/gwt-dev-oophm.jar" else="${dir.src}">
+				<isset property="oophm"/>
+			</condition>
+			
+			<!-- A hack that either sets a mac-specific -X option or sets -Xmx a 2nd time, which is harmless -->
+            <condition property="gwt.compile.macarg1" value="-XstartOnFirstThread" else="${maxmemory}">
+            	<and>
+            		<not>
+            			<isset property="oophm"/>
+            		</not>
+	                <os family="mac"/>
+            	</and>
+            </condition>
+			
+            <java
+                failonerror="true"
+                fork="true"
+                jvm="${gwt.java.home}/bin/java"
+                classname="@{mainclass}">
+                
+                <classpath>
+                    <pathelement location="${dir.src}"/>
+                    <pathelement location="${dir.war.classes}"/>
+                    <pathelement location="${gwt.oophm.jar}"/>
+                	<path refid="gwt.path.classpath"/>
+                </classpath>
+        
+            	<jvmarg value="${maxmemory}"/>
+                
+                <jvmarg value="${gwt.compile.macarg1}"/>
+                
+                <arg value="-war"/><arg value="${dir.war}"/>
+                
+                <args/>
+                
+                <arg line="${gwt.fileset.client.modules}"/>
+            </java>
+        </sequential>
+	</macrodef>
+
+	<target name="gwtc" depends="gwt-uptodate, java.compile"
+        description="GWT compile to JavaScript" unless="gwt.isuptodate">
+          
+		<m_rungwt mainclass="com.google.gwt.dev.Compiler"/>
+		<touch file="${gwt.isuptodate.file}"/>
+    </target>
+
+	<target name="gwthosted" depends="java.compile"
+	    description="GWT Hosted mode">
+		
+		<m_assertlocalproperty name="tomcat.port"/>
+		<m_assertlocalproperty name="gwt.hosted.debug.port"/>
+		<m_assertlocalproperty name="gwt.hosted.debug.suspend"/>
+		
+		<property name="gwt.hosted.debug.args"
+			value="transport=dt_socket,address=${gwt.hosted.debug.port},server=y,suspend=${gwt.hosted.debug.suspend}"/>
+        
+		<condition property="gwt.hosted.debug"
+        	value="-agentlib:jdwp=${gwt.hosted.debug.args}"
+        	else="-Xdebug -Xrunjdwp:${gwt.hosted.debug.args}">
+            
+        	<os family="mac"/>
+        </condition>
+		
+		<m_rungwt mainclass="com.google.gwt.dev.HostedMode">
+			<jvmarg line="${gwt.hosted.debug}"/>
+			<arg value="-noserver"/>
+			<arg line="-startupUrl http://localhost:${tomcat.port}/${deploy.warfile.name}"/>
+		</m_rungwt>
+	</target>
+		
+</project>

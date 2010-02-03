@@ -1,0 +1,66 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+
+ 
+    <session-factory>
+        <property name="connection.driver_class">@mysql.driver@</property>
+  		<property name="connection.url">jdbc:mysql://@mysql.host@:3306/@mysql.database@</property> 
+        <property name="connection.username">@mysql.user.name@</property>
+      	<property name="connection.password">@mysql.user.password@</property> 
+
+        <!-- SQL dialect -->
+        <property name="dialect">org.hibernate.dialect.MySQLInnoDBDialect</property>
+
+        <!-- Enable Hibernate's automatic session context management -->
+        <property name="current_session_context_class">thread</property>
+
+        <!-- Disable the second-level cache  -->
+		<property name="cache.provider_class">org.hibernate.cache.NoCacheProvider</property>
+ 
+ 		<!--  Enable second-level cache 		
+ 		<property name="cache.provider_class">org.hibernate.cache.EhCacheProvider</property>
+   		<property name="generate_statistics">true</property>
+ 		<property name="cache.use_structured_entries">true</property>
+ 		<property name="cache.provider_configuration_file_resource_path">ehcache.xml</property>
+ 		 -->
+ 		
+ 		<!--
+ 		<prop key="hibernate.cache.use_query_cache">true</prop>
+		<prop key="hibernate.cache.use_second_level_cache">true</prop>
+		-->
+  
+        <property name="show_sql">@hibernate.sql.show@</property>
+        <property name="format_sql">@hibernate.sql.format@</property>
+        <property name="use_sql_comments">@hibernate.sql.comments@</property>
+        
+        <!-- configuration pool via c3p0--> 
+		<property name="c3p0.acquire_increment">1</property> 
+		<property name="c3p0.idle_test_period">100</property> <!-- seconds --> 
+		<property name="c3p0.max_size">50</property> 
+		<property name="c3p0.max_statements">0</property> 
+		<property name="c3p0.min_size">1</property> 
+		<property name="c3p0.timeout">100</property> <!-- seconds --> 
+
+        <!-- Drop and re-create the database schema on startup -->
+        <property name="hbm2ddl.auto">@hibernate.hbm2ddl.auto@</property>
+
+        <mapping class="com.iloggr.client.model.Account"/>
+        <mapping class="com.iloggr.client.model.Action"/>
+        <mapping class="com.iloggr.client.model.Application"/>
+        <mapping class="com.iloggr.client.model.Carrier"/>
+        <mapping class="com.iloggr.client.model.Event"/>
+        <mapping class="com.iloggr.client.model.LocationFix"/>
+        <mapping class="com.iloggr.client.model.Phone"/>
+        <mapping class="com.iloggr.client.model.Provisioning"/>
+        <mapping class="com.iloggr.client.model.ProvisioningParameter"/>
+        <mapping class="com.iloggr.client.model.ApplicationDuration"/>
+        <mapping class="com.iloggr.client.model.Counter"/>
+        <mapping class="com.iloggr.client.model.InvitationCode"/>
+   
+    </session-factory>
+
+</hibernate-configuration>
